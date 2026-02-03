@@ -653,4 +653,21 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)clearCookies:(CDVInvokedUrlCommand*)command {
+    // Clear cookies from the system cookie storage (NSHTTPCookieStorage)
+    // This is necessary because setHTTPShouldHandleCookies:YES allows iOS to automatically
+    // attach cookies from the system storage. When clearCookies() is called, we need to clear
+    // both the plugin's managed cookies AND the system cookies to ensure cookies aren't sent
+    // on subsequent requests. Fixes issue #248: clearCookies() does not work on iOS
+    NSHTTPCookieStorage *httpCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    NSArray *cookies = [httpCookieStorage cookies];
+    
+    for (NSHTTPCookie *cookie in cookies) {
+        [httpCookieStorage deleteCookie:cookie];
+    }
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 @end

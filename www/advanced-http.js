@@ -13,7 +13,8 @@ var jsUtil = require(pluginId + '.js-util');
 var ToughCookie = require(pluginId + '.tough-cookie');
 var lodash = require(pluginId + '.lodash');
 var WebStorageCookieStore = require(pluginId + '.local-storage-store')(ToughCookie, lodash);
-var cookieHandler = require(pluginId + '.cookie-handler')(window.localStorage, ToughCookie, WebStorageCookieStore);
+// Pass exec to cookie handler so it can call native clearCookies() method on iOS
+var cookieHandler = require(pluginId + '.cookie-handler')(window.localStorage, ToughCookie, WebStorageCookieStore, exec);
 var dependencyValidator = require(pluginId + '.dependency-validator')(window, window.console, messages);
 var ponyfills = require(pluginId + '.ponyfills')(window);
 var helpers = require(pluginId + '.helpers')(window, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills);

@@ -1,4 +1,4 @@
-module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
+module.exports = function init(storage, ToughCookie, WebStorageCookieStore, exec) {
   var storeKey = '__advancedHttpCookieStore__';
 
   var store = new WebStorageCookieStore(storage, storeKey);
@@ -53,7 +53,15 @@ module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
   }
 
   function clearCookies() {
+    // Clear cookies from the plugin's managed store (localStorage)
     window.localStorage.removeItem(storeKey);
+    
+    // Also clear system cookies on iOS via native plugin when using setHTTPShouldHandleCookies:YES
+    // The native clearCookies() method removes all cookies from NSHTTPCookieStorage
+    // This ensures that iOS won't automatically attach cookies to subsequent requests
+    if (exec) {
+      exec(function() {}, function() {}, 'CordovaHttpPlugin', 'clearCookies', []);
+    }
   }
 
   function removeCookies(url, cb) {
